@@ -511,8 +511,8 @@ function Leaderboard() {
     [],
   );
 
-  const singlesGames = PLAYERS.reduce((s, p) => s + p.wins, 0);
-  const doublesGames = TEAMS.reduce((s, t) => s + t.wins, 0);
+  const singlesGames = SINGLE_MATCHES.length;
+  const doublesGames = DOUBLE_MATCHES.length;
   const totalGames = singlesGames + doublesGames;
 
   // Calcola la coppia migliore dai double matches

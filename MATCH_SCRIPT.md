@@ -1,6 +1,6 @@
-# 🏓 Script Aggiungi Partita
+# 🏓 Script Gestione Partite
 
-Script interattivo per aggiungere facilmente nuove partite alla leaderboard.
+Script interattivo per aggiungere o eliminare partite dalla leaderboard.
 
 ## 🚀 Come Usare
 
@@ -10,26 +10,39 @@ npm run match
 
 ## 📋 Cosa fa lo script?
 
-1. **Chiede il tipo di partita** (Singolo o Doppio)
-2. **Mostra i giocatori disponibili** con numeri
-3. **Chiede i giocatori/team** che hanno giocato
-4. **Chiede il risultato** della partita
-5. **Aggiorna automaticamente:**
-   - ✅ Aggiunge la partita alla lista
-   - ✅ Aggiorna il conteggio vittorie del vincitore
-   - ✅ Mantiene solo le ultime 5 partite
-   - ✅ Ordina i giocatori alfabeticamente
-6. **Chiede se aggiungere altre partite**
+1. **Chiede cosa vuoi fare**
+   - Aggiungere una partita
+   - Eliminare una partita (utile se hai inserito un risultato sbagliato)
+2. **Se aggiungi una partita:**
+   - Chiede il tipo di partita (Singolo o Doppio)
+   - Mostra i giocatori disponibili con numeri
+   - Chiede i giocatori/team che hanno giocato
+   - Chiede il risultato della partita
+   - Aggiunge la partita e ricalcola le vittorie automaticamente
+3. **Se elimini una partita:**
+   - Chiede il tipo di partita (Singolo o Doppio)
+   - Mostra tutte le partite disponibili
+   - Chiede quale eliminare
+   - Elimina la partita e ricalcola le vittorie automaticamente
+4. **Chiede se fare altre modifiche**
    - Se sì: ripete il processo dall'inizio
    - Se no: salva i dati e procede
-7. **Chiede se fare push su GitHub**
+5. **Chiede se fare push su GitHub**
    - Se sì: fa commit e push automatico
    - Se no: puoi farlo manualmente dopo
 
 ## 📝 Esempio d'Uso
 
+### Aggiungere una partita
+
 ```
-🏓 Reply Ping Pong League - Aggiungi Partita
+🏓 Reply Ping Pong League - Gestione Partite
+
+Cosa vuoi fare?
+1) Aggiungere una partita
+2) Eliminare una partita
+
+Scegli (1 o 2): 1
 
 Che tipo di partita vuoi aggiungere?
 1) Singolo
@@ -58,7 +71,7 @@ Punteggio Andrea: 11
    Luca V 7 - 11 Andrea
    🏆 Vincitore: Andrea
 
-Vuoi aggiungere un'altra partita? (s/n): n
+Vuoi fare altre modifiche? (s/n): n
 
 Vuoi fare commit e push su GitHub? (s/n): s
 
@@ -66,25 +79,63 @@ Vuoi fare commit e push su GitHub? (s/n): s
 ✅ Push completato! L'app si aggiornerà automaticamente.
 ```
 
+### Eliminare una partita
+
+```
+Cosa vuoi fare?
+1) Aggiungere una partita
+2) Eliminare una partita
+
+Scegli (1 o 2): 2
+
+Che tipo di partita vuoi eliminare?
+1) Singolo
+2) Doppio
+
+Scegli (1 o 2): 1
+
+📋 Partite singolo disponibili:
+  1) Luca V 7-11 Andrea (02/07/2026)
+  2) Riccardo 11-9 Davide (01/07/2026)
+  3) Andrea 11-4 Gabri (30/06/2026)
+
+Quale partita vuoi eliminare? (1-3): 1
+
+✅ Partita eliminata con successo!
+   Luca V 7 - 11 Andrea
+
+Vuoi fare altre modifiche? (s/n): n
+```
+
 ## 🎯 Funzionalità
 
-### Partite Singole
+### Aggiungere Partite
+
+#### Partite Singole
 - Seleziona 2 giocatori
 - Inserisci i punteggi
 - Il vincitore viene determinato automaticamente
-- Le vittorie vengono aggiornate
+- Le vittorie vengono ricalcolate
 
-### Partite Doppie
+#### Partite Doppie
 - Seleziona 2 giocatori per Team 1
 - Seleziona 2 giocatori per Team 2
 - Inserisci i punteggi
 - Entrambi i membri del team vincente ricevono +1 vittoria
+- Le vittorie del team vengono aggiornate per la "Best Duo"
+
+### Eliminare Partite
+
+- Utile se hai inserito un risultato sbagliato
+- Mostra tutte le partite disponibili
+- Seleziona quale eliminare
+- Le vittorie vengono ricalcolate automaticamente
 
 ### Gestione Automatica
-- **Data**: Aggiunta automaticamente (oggi)
-- **Vittorie**: Calcolate e aggiornate automaticamente
+- **Data**: Aggiunta automaticamente (oggi) per nuove partite
+- **Vittorie**: Ricalcolate automaticamente ad ogni modifica
 - **Classifica**: Mantenuta in ordine alfabetico
-- **Cronologia**: Solo le ultime 5 partite per tipo
+- **Storico**: Tutte le partite vengono mantenute (nessun limite)
 
 ## 🔧 Modifica Manuale
 

@@ -23,7 +23,86 @@ const colors = {
   red: '\x1b[31m',
 };
 
-console.log(`\n${colors.cyan}🏓 Reply Ping Pong League - Aggiungi Partita${colors.reset}\n`);
+console.log(`\n${colors.cyan}🏓 Reply Ping Pong League - Gestione Partite${colors.reset}\n`);
+
+// Funzione per ricalcolare tutte le vittorie dalle partite esistenti
+function recalculateWins(data) {
+  // Azzera tutti i conteggi
+  data.players.forEach(p => p.wins = 0);
+  data.teams.forEach(t => t.wins = 0);
+  
+  // Conta vittorie da partite singole
+  data.singleMatches.forEach(match => {
+    const winner = match.score1 > match.score2 ? match.player1 : match.player2;
+    const player = data.players.find(p => p.name === winner);
+    if (player) player.wins++;
+  });
+  
+  // Conta vittorie da partite doppie
+  data.doubleMatches.forEach(match => {
+    const winningTeam = match.score1 > match.score2 ? match.team1 : match.team2;
+    
+    // Aggiorna vittorie giocatori
+    winningTeam.forEach(playerName => {
+      const player = data.players.find(p => p.name === playerName);
+      if (player) player.wins++;
+    });
+    
+    // Aggiorna vittorie team
+    const teamKey = [...winningTeam].sort().join('-');
+    const team = data.teams.find(t => {
+      const tKey = [...t.members].sort().join('-');
+      return tKey === teamKey;
+    });
+    if (team) team.wins++;
+  });
+}
+
+async function deleteMatch(data) {
+  // Scegli tipo di partita da eliminare
+  console.log(`${colors.yellow}Che tipo di partita vuoi eliminare?${colors.reset}`);
+  console.log('1) Singolo');
+  console.log('2) Doppio\n');
+  const tipoInput = await question('Scegli (1 o 2): ');
+  const tipo = tipoInput.trim() === '2' ? 'doppio' : 'singolo';
+  
+  const matches = tipo === 'singolo' ? data.singleMatches : data.doubleMatches;
+  
+  if (matches.length === 0) {
+    console.log(`\n${colors.red}❌ Nessuna partita ${tipo} disponibile!${colors.reset}`);
+    return;
+  }
+  
+  // Mostra le partite disponibili
+  console.log(`\n${colors.blue}📋 Partite ${tipo} disponibili:${colors.reset}`);
+  matches.forEach((match, i) => {
+    if (tipo === 'singolo') {
+      console.log(`  ${i + 1}) ${match.player1} ${match.score1}-${match.score2} ${match.player2} (${match.date})`);
+    } else {
+      console.log(`  ${i + 1}) ${match.team1.join('&')} ${match.score1}-${match.score2} ${match.team2.join('&')} (${match.date})`);
+    }
+  });
+  
+  const scelta = parseInt(await question(`\nQuale partita vuoi eliminare? (1-${matches.length}): `)) - 1;
+  
+  if (scelta < 0 || scelta >= matches.length) {
+    console.log(`\n${colors.red}❌ Scelta non valida!${colors.reset}`);
+    return;
+  }
+  
+  // Rimuovi la partita
+  const removed = matches.splice(scelta, 1)[0];
+  
+  // Ricalcola le vittorie
+  recalculateWins(data);
+  
+  console.log(`\n${colors.green}✅ Partita eliminata con successo!${colors.reset}`);
+  if (tipo === 'singolo') {
+    console.log(`   ${removed.player1} ${removed.score1} - ${removed.score2} ${removed.player2}`);
+  } else {
+    console.log(`   ${removed.team1.join(' & ')} ${removed.score1} - ${removed.score2} ${removed.team2.join(' & ')}`);
+  }
+}
 
 async function addMatch(data) {
   // 1. Tipo di partita
@@ -67,17 +146,6 @@ async function addMatch(data) {
       // Aggiungi la partita all'inizio dell'array
       data.singleMatches.unshift(match);
       
-      // Mantieni solo le ultime 5 partite
-      if (data.singleMatches.length > 5) {
-        data.singleMatches = data.singleMatches.slice(0, 5);
-      }
-      
-      // Aggiorna le vittorie
-      const winnerPlayer = data.players.find(p => p.name === winner);
-      if (winnerPlayer) {
-        winnerPlayer.wins += 1;
-      }
-      
     } else {
       // Partita doppia
       console.log(`\n${colors.blue}📋 Giocatori disponibili:${colors.reset}`);
@@ -113,20 +181,10 @@ async function addMatch(data) {
       
       // Aggiungi la partita all'inizio dell'array
       data.doubleMatches.unshift(match);
-      
-      // Mantieni solo le ultime 5 partite
-      if (data.doubleMatches.length > 5) {
-        data.doubleMatches = data.doubleMatches.slice(0, 5);
-      }
-      
-      // Aggiorna le vittorie per entrambi i membri del team vincente
-      winningTeam.forEach(playerName => {
-        const player = data.players.find(p => p.name === playerName);
-        if (player) {
-          player.wins += 1;
-        }
-      });
     }
+    
+    // Ricalcola tutte le vittorie
+    recalculateWins(data);
     
     // Ordina i giocatori alfabeticamente
     data.players.sort((a, b) => a.name.localeCompare(b.name));
@@ -147,12 +205,23 @@ async function main() {
     // Leggi i dati attuali
     const data = JSON.parse(readFileSync(DATA_PATH, 'utf-8'));
     
-    // Loop per aggiungere più partite
+    // Loop per gestire più operazioni
     let continua = true;
     while (continua) {
-      await addMatch(data);
+      console.log(`${colors.yellow}Cosa vuoi fare?${colors.reset}`);
+      console.log('1) Aggiungere una partita');
+      console.log('2) Eliminare una partita\n');
       
-      const risposta = await question(`\n${colors.yellow}Vuoi aggiungere un'altra partita? (s/n): ${colors.reset}`);
+      const azione = await question('Scegli (1 o 2): ');
+      console.log('');
+      
+      if (azione.trim() === '2') {
+        await deleteMatch(data);
+      } else {
+        await addMatch(data);
+      }
+      
+      const risposta = await question(`\n${colors.yellow}Vuoi fare altre modifiche? (s/n): ${colors.reset}`);
       continua = risposta.toLowerCase() === 's' || risposta.toLowerCase() === 'y';
       
       if (continua) {
@@ -171,7 +240,7 @@ async function main() {
       
       try {
         execSync('git add src/data/matches.json', { stdio: 'inherit' });
-        execSync(`git commit -m "Add match - ${new Date().toLocaleDateString('it-IT')}"`, { stdio: 'inherit' });
+        execSync(`git commit -m "Update matches - ${new Date().toLocaleDateString('it-IT')}"`, { stdio: 'inherit' });
         execSync('git push', { stdio: 'inherit' });
         
         console.log(`\n${colors.green}✅ Push completato! L'app si aggiornerà automaticamente.${colors.reset}\n`);

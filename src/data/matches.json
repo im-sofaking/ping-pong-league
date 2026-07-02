@@ -2,31 +2,31 @@
   "players": [
     {
       "name": "Andrea",
-      "wins": 92
+      "wins": 0
     },
     {
       "name": "Carlotta",
-      "wins": 8
+      "wins": 0
     },
     {
       "name": "Davide",
-      "wins": 12
+      "wins": 0
     },
     {
       "name": "Gabri",
-      "wins": 10
+      "wins": 0
     },
     {
       "name": "Luca B",
-      "wins": 19
+      "wins": 0
     },
     {
       "name": "Luca V",
-      "wins": 15
+      "wins": 0
     },
     {
       "name": "Riccardo",
-      "wins": 14
+      "wins": 0
     }
   ],
   "teams": [
@@ -36,7 +36,7 @@
         "Luca B",
         "Riccardo"
       ],
-      "wins": 15
+      "wins": 0
     },
     {
       "name": "Top Spin",
@@ -44,7 +44,7 @@
         "Andrea",
         "Davide"
       ],
-      "wins": 11
+      "wins": 0
     },
     {
       "name": "Net Ninjas",
@@ -52,7 +52,7 @@
         "Gabri",
         "Luca V"
       ],
-      "wins": 9
+      "wins": 0
     },
     {
       "name": "Backhand Kings",
@@ -60,111 +60,9 @@
         "Luca B",
         "Andrea"
       ],
-      "wins": 6
+      "wins": 0
     }
   ],
-  "singleMatches": [
-    {
-      "player1": "Andrea",
-      "player2": "Luca V",
-      "score1": 11,
-      "score2": 4,
-      "date": "02/07/2026"
-    },
-    {
-      "player1": "Andrea",
-      "player2": "Luca V",
-      "score1": 11,
-      "score2": 4,
-      "date": "02/07/2026"
-    },
-    {
-      "player1": "Luca B",
-      "player2": "Andrea",
-      "score1": 11,
-      "score2": 7,
-      "date": "02/07/2026"
-    },
-    {
-      "player1": "Riccardo",
-      "player2": "Davide",
-      "score1": 11,
-      "score2": 9,
-      "date": "01/07/2026"
-    },
-    {
-      "player1": "Andrea",
-      "player2": "Gabri",
-      "score1": 11,
-      "score2": 4,
-      "date": "30/06/2026"
-    }
-  ],
-  "doubleMatches": [
-    {
-      "team1": [
-        "Luca B",
-        "Andrea"
-      ],
-      "team2": [
-        "Davide",
-        "Carlotta"
-      ],
-      "score1": 11,
-      "score2": 4,
-      "date": "02/07/2026"
-    },
-    {
-      "team1": [
-        "Riccardo",
-        "Gabri"
-      ],
-      "team2": [
-        "Luca B",
-        "Andrea"
-      ],
-      "score1": 11,
-      "score2": 8,
-      "date": "01/07/2026"
-    },
-    {
-      "team1": [
-        "Davide",
-        "Carlotta"
-      ],
-      "team2": [
-        "Luca V",
-        "Riccardo"
-      ],
-      "score1": 9,
-      "score2": 11,
-      "date": "30/06/2026"
-    },
-    {
-      "team1": [
-        "Luca B",
-        "Andrea"
-      ],
-      "team2": [
-        "Riccardo",
-        "Davide"
-      ],
-      "score1": 11,
-      "score2": 7,
-      "date": "29/06/2026"
-    },
-    {
-      "team1": [
-        "Gabri",
-        "Carlotta"
-      ],
-      "team2": [
-        "Luca B",
-        "Andrea"
-      ],
-      "score1": 6,
-      "score2": 11,
-      "date": "28/06/2026"
-    }
-  ]
+  "singleMatches": [],
+  "doubleMatches": []
 }
