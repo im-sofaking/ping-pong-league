@@ -25,17 +25,13 @@ const colors = {
 
 console.log(`\n${colors.cyan}🏓 Reply Ping Pong League - Aggiungi Partita${colors.reset}\n`);
 
-async function main() {
-  try {
-    // Leggi i dati attuali
-    const data = JSON.parse(readFileSync(DATA_PATH, 'utf-8'));
-    
-    // 1. Tipo di partita
-    console.log(`${colors.yellow}Che tipo di partita vuoi aggiungere?${colors.reset}`);
-    console.log('1) Singolo');
-    console.log('2) Doppio\n');
-    const tipoInput = await question('Scegli (1 o 2): ');
-    const tipo = tipoInput.trim() === '2' ? 'doppio' : 'singolo';
+async function addMatch(data) {
+  // 1. Tipo di partita
+  console.log(`${colors.yellow}Che tipo di partita vuoi aggiungere?${colors.reset}`);
+  console.log('1) Singolo');
+  console.log('2) Doppio\n');
+  const tipoInput = await question('Scegli (1 o 2): ');
+  const tipo = tipoInput.trim() === '2' ? 'doppio' : 'singolo';
     
     let match = {};
     let winner = null;
@@ -135,9 +131,7 @@ async function main() {
     // Ordina i giocatori alfabeticamente
     data.players.sort((a, b) => a.name.localeCompare(b.name));
     
-    // Salva i dati aggiornati
-    writeFileSync(DATA_PATH, JSON.stringify(data, null, 2), 'utf-8');
-    
+    // Mostra conferma
     console.log(`\n${colors.green}✅ Partita aggiunta con successo!${colors.reset}`);
     
     if (tipo === 'singolo') {
@@ -146,6 +140,28 @@ async function main() {
     } else {
       console.log(`   ${match.team1.join(' & ')} ${match.score1} - ${match.score2} ${match.team2.join(' & ')}`);
     }
+}
+
+async function main() {
+  try {
+    // Leggi i dati attuali
+    const data = JSON.parse(readFileSync(DATA_PATH, 'utf-8'));
+    
+    // Loop per aggiungere più partite
+    let continua = true;
+    while (continua) {
+      await addMatch(data);
+      
+      const risposta = await question(`\n${colors.yellow}Vuoi aggiungere un'altra partita? (s/n): ${colors.reset}`);
+      continua = risposta.toLowerCase() === 's' || risposta.toLowerCase() === 'y';
+      
+      if (continua) {
+        console.log(''); // Riga vuota per separare
+      }
+    }
+    
+    // Salva i dati aggiornati
+    writeFileSync(DATA_PATH, JSON.stringify(data, null, 2), 'utf-8');
     
     // Chiedi se fare push
     const doPush = await question(`\n${colors.yellow}Vuoi fare commit e push su GitHub? (s/n): ${colors.reset}`);

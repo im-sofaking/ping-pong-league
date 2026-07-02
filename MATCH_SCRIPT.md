@@ -19,7 +19,10 @@ npm run match
    - ✅ Aggiorna il conteggio vittorie del vincitore
    - ✅ Mantiene solo le ultime 5 partite
    - ✅ Ordina i giocatori alfabeticamente
-6. **Chiede se fare push su GitHub**
+6. **Chiede se aggiungere altre partite**
+   - Se sì: ripete il processo dall'inizio
+   - Se no: salva i dati e procede
+7. **Chiede se fare push su GitHub**
    - Se sì: fa commit e push automatico
    - Se no: puoi farlo manualmente dopo
 
@@ -54,6 +57,8 @@ Punteggio Andrea: 11
 ✅ Partita aggiunta con successo!
    Luca V 7 - 11 Andrea
    🏆 Vincitore: Andrea
+
+Vuoi aggiungere un'altra partita? (s/n): n
 
 Vuoi fare commit e push su GitHub? (s/n): s
 
