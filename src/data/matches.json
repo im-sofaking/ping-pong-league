@@ -2,7 +2,7 @@
   "players": [
     {
       "name": "Andrea",
-      "wins": 91
+      "wins": 92
     },
     {
       "name": "Carlotta",
@@ -72,6 +72,13 @@
       "date": "02/07/2026"
     },
     {
+      "player1": "Andrea",
+      "player2": "Luca V",
+      "score1": 11,
+      "score2": 4,
+      "date": "02/07/2026"
+    },
+    {
       "player1": "Luca B",
       "player2": "Andrea",
       "score1": 11,
@@ -91,13 +98,6 @@
       "score1": 11,
       "score2": 4,
       "date": "30/06/2026"
-    },
-    {
-      "player1": "Luca V",
-      "player2": "Luca B",
-      "score1": 8,
-      "score2": 11,
-      "date": "29/06/2026"
     }
   ],
   "doubleMatches": [
