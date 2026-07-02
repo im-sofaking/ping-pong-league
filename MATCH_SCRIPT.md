@@ -13,21 +13,26 @@ npm run match
 1. **Chiede cosa vuoi fare**
    - Aggiungere una partita
    - Eliminare una partita (utile se hai inserito un risultato sbagliato)
+   - Azzerare la stagione (elimina tutte le partite e azzera i punteggi)
 2. **Se aggiungi una partita:**
    - Chiede il tipo di partita (Singolo o Doppio)
    - Mostra i giocatori disponibili con numeri
    - Chiede i giocatori/team che hanno giocato
-   - Chiede il risultato della partita
+   - Chiede il risultato nel formato **11-9** (un solo input)
    - Aggiunge la partita e ricalcola le vittorie automaticamente
 3. **Se elimini una partita:**
    - Chiede il tipo di partita (Singolo o Doppio)
    - Mostra tutte le partite disponibili
    - Chiede quale eliminare
    - Elimina la partita e ricalcola le vittorie automaticamente
-4. **Chiede se fare altre modifiche**
+4. **Se azzeri la stagione:**
+   - Chiede doppia conferma (per sicurezza)
+   - Elimina tutte le partite
+   - Azzera tutti i conteggi vittorie
+5. **Chiede se fare altre modifiche**
    - Se sì: ripete il processo dall'inizio
    - Se no: salva i dati e procede
-5. **Chiede se fare push su GitHub**
+6. **Chiede se fare push su GitHub**
    - Se sì: fa commit e push automatico
    - Se no: puoi farlo manualmente dopo
 
@@ -41,8 +46,9 @@ npm run match
 Cosa vuoi fare?
 1) Aggiungere una partita
 2) Eliminare una partita
+3) Azzera stagione
 
-Scegli (1 o 2): 1
+Scegli (1, 2 o 3): 1
 
 Che tipo di partita vuoi aggiungere?
 1) Singolo
@@ -64,8 +70,7 @@ Giocatore 2 (numero): 1
 
 ⚡ Luca V vs Andrea
 
-Punteggio Luca V: 7
-Punteggio Andrea: 11
+Risultato (es. 11-9): 7-11
 
 ✅ Partita aggiunta con successo!
    Luca V 7 - 11 Andrea
@@ -85,8 +90,9 @@ Vuoi fare commit e push su GitHub? (s/n): s
 Cosa vuoi fare?
 1) Aggiungere una partita
 2) Eliminare una partita
+3) Azzera stagione
 
-Scegli (1 o 2): 2
+Scegli (1, 2 o 3): 2
 
 Che tipo di partita vuoi eliminare?
 1) Singolo
@@ -107,20 +113,45 @@ Quale partita vuoi eliminare? (1-3): 1
 Vuoi fare altre modifiche? (s/n): n
 ```
 
+### Azzerare la stagione
+
+```
+Cosa vuoi fare?
+1) Aggiungere una partita
+2) Eliminare una partita
+3) Azzera stagione
+
+Scegli (1, 2 o 3): 3
+
+⚠️  ATTENZIONE! Stai per azzerare completamente la stagione.
+Questa azione eliminerà:
+  - Tutte le partite singole
+  - Tutte le partite doppie
+  - Tutti i conteggi vittorie
+
+Sei sicuro di voler azzerare tutto? (scrivi SI): SI
+Conferma nuovamente (scrivi AZZERA): AZZERA
+
+✅ Stagione azzerata con successo!
+Pronti per una nuova stagione! 🏓
+
+Vuoi fare altre modifiche? (s/n): n
+```
+
 ## 🎯 Funzionalità
 
 ### Aggiungere Partite
 
 #### Partite Singole
 - Seleziona 2 giocatori
-- Inserisci i punteggi
+- Inserisci il risultato nel formato **11-9** (un solo input)
 - Il vincitore viene determinato automaticamente
 - Le vittorie vengono ricalcolate
 
 #### Partite Doppie
 - Seleziona 2 giocatori per Team 1
 - Seleziona 2 giocatori per Team 2
-- Inserisci i punteggi
+- Inserisci il risultato nel formato **11-9** (un solo input)
 - Entrambi i membri del team vincente ricevono +1 vittoria
 - Le vittorie del team vengono aggiornate per la "Best Duo"
 
@@ -130,6 +161,13 @@ Vuoi fare altre modifiche? (s/n): n
 - Mostra tutte le partite disponibili
 - Seleziona quale eliminare
 - Le vittorie vengono ricalcolate automaticamente
+
+### Azzerare Stagione
+
+- Richiede **doppia conferma** per sicurezza
+- Elimina tutte le partite (singole e doppie)
+- Azzera tutti i conteggi vittorie
+- Prepara l'app per una nuova stagione
 
 ### Gestione Automatica
 - **Data**: Aggiunta automaticamente (oggi) per nuove partite

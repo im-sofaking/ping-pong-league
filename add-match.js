@@ -58,6 +58,37 @@ function recalculateWins(data) {
   });
 }
 
+async function resetSeason(data) {
+  console.log(`\n${colors.red}⚠️  ATTENZIONE! Stai per azzerare completamente la stagione.${colors.reset}`);
+  console.log(`${colors.yellow}Questa azione eliminerà:${colors.reset}`);
+  console.log('  - Tutte le partite singole');
+  console.log('  - Tutte le partite doppie');
+  console.log('  - Tutti i conteggi vittorie\n');
+  
+  const conferma1 = await question(`${colors.red}Sei sicuro di voler azzerare tutto? (scrivi SI): ${colors.reset}`);
+  
+  if (conferma1.trim().toUpperCase() !== 'SI') {
+    console.log(`\n${colors.yellow}❌ Operazione annullata.${colors.reset}`);
+    return;
+  }
+  
+  const conferma2 = await question(`${colors.red}Conferma nuovamente (scrivi AZZERA): ${colors.reset}`);
+  
+  if (conferma2.trim().toUpperCase() !== 'AZZERA') {
+    console.log(`\n${colors.yellow}❌ Operazione annullata.${colors.reset}`);
+    return;
+  }
+  
+  // Azzera tutto
+  data.players.forEach(p => p.wins = 0);
+  data.teams.forEach(t => t.wins = 0);
+  data.singleMatches = [];
+  data.doubleMatches = [];
+  
+  console.log(`\n${colors.green}✅ Stagione azzerata con successo!${colors.reset}`);
+  console.log(`${colors.cyan}Pronti per una nuova stagione! 🏓${colors.reset}`);
+}
+
 async function deleteMatch(data) {
   // Scegli tipo di partita da eliminare
   console.log(`${colors.yellow}Che tipo di partita vuoi eliminare?${colors.reset}`);
@@ -128,8 +159,19 @@ async function addMatch(data) {
       
       console.log(`\n${colors.cyan}⚡ ${player1} vs ${player2}${colors.reset}`);
       
-      const score1 = parseInt(await question(`Punteggio ${player1}: `));
-      const score2 = parseInt(await question(`Punteggio ${player2}: `));
+      let score1, score2;
+      while (true) {
+        const risultato = await question(`Risultato (es. 11-9): `);
+        const match = risultato.trim().match(/^(\d+)-(\d+)$/);
+        
+        if (match) {
+          score1 = parseInt(match[1]);
+          score2 = parseInt(match[2]);
+          break;
+        } else {
+          console.log(`${colors.red}Formato non valido! Usa il formato: 11-9${colors.reset}`);
+        }
+      }
       
       const today = new Date().toLocaleDateString('it-IT');
       
@@ -164,8 +206,19 @@ async function addMatch(data) {
       
       console.log(`\n${colors.cyan}⚡ ${team1.join(' & ')} vs ${team2.join(' & ')}${colors.reset}`);
       
-      const score1 = parseInt(await question(`Punteggio Team 1: `));
-      const score2 = parseInt(await question(`Punteggio Team 2: `));
+      let score1, score2;
+      while (true) {
+        const risultato = await question(`Risultato (es. 11-9): `);
+        const match = risultato.trim().match(/^(\d+)-(\d+)$/);
+        
+        if (match) {
+          score1 = parseInt(match[1]);
+          score2 = parseInt(match[2]);
+          break;
+        } else {
+          console.log(`${colors.red}Formato non valido! Usa il formato: 11-9${colors.reset}`);
+        }
+      }
       
       const today = new Date().toLocaleDateString('it-IT');
       
@@ -210,13 +263,16 @@ async function main() {
     while (continua) {
       console.log(`${colors.yellow}Cosa vuoi fare?${colors.reset}`);
       console.log('1) Aggiungere una partita');
-      console.log('2) Eliminare una partita\n');
+      console.log('2) Eliminare una partita');
+      console.log('3) Azzera stagione\n');
       
-      const azione = await question('Scegli (1 o 2): ');
+      const azione = await question('Scegli (1, 2 o 3): ');
       console.log('');
       
       if (azione.trim() === '2') {
         await deleteMatch(data);
+      } else if (azione.trim() === '3') {
+        await resetSeason(data);
       } else {
         await addMatch(data);
       }

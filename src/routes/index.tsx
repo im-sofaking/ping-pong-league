@@ -515,8 +515,8 @@ function Leaderboard() {
   const doublesGames = DOUBLE_MATCHES.length;
   const totalGames = singlesGames + doublesGames;
 
-  // Calcola la coppia migliore dai double matches
-  const duoStats = useMemo(() => {
+  // Calcola le coppie migliori dai double matches
+  const bestDuos = useMemo(() => {
     const duoMap = new Map<string, { players: string[], wins: number }>();
     
     DOUBLE_MATCHES.forEach((match) => {
@@ -531,7 +531,13 @@ function Leaderboard() {
     });
     
     const duos = Array.from(duoMap.values());
-    return duos.sort((a, b) => b.wins - a.wins)[0] || { players: ["Luca B", "Andrea"], wins: 3 };
+    if (duos.length === 0) return [];
+    
+    // Trova il numero massimo di vittorie
+    const maxWins = Math.max(...duos.map(d => d.wins));
+    
+    // Restituisci tutte le coppie con il numero massimo di vittorie
+    return duos.filter(d => d.wins === maxWins);
   }, []);
 
   return (
@@ -579,8 +585,44 @@ function Leaderboard() {
       <div className="space-y-6">
         <div className="grid gap-6 md:grid-cols-[1fr_auto]">
           <LeaderboardCard label="Classifica" rows={singlesRows} delayBase={0.2} />
-          <div className="md:w-80">
-            <BestDuoCard players={duoStats.players} wins={duoStats.wins} delayBase={0.25} />
+          <div className="md:w-80 space-y-4">
+            {bestDuos.length === 0 ? (
+              <motion.div
+                className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-2xl md:p-6"
+                style={{ boxShadow: "0 30px 80px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)" }}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25, duration: 0.6 }}
+              >
+                <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-amber-500/15 blur-3xl" />
+                <div className="relative text-center">
+                  <h2 className="mb-3 text-[11px] font-medium tracking-[0.3em] text-white/60 uppercase">Best Duo</h2>
+                  <span className="text-4xl mb-2 block">🏆</span>
+                  <p className="text-sm text-white/50">Nessuna partita doppia ancora giocata</p>
+                </div>
+              </motion.div>
+            ) : (
+              <>
+                {bestDuos.length > 1 && (
+                  <motion.div
+                    className="text-center text-xs text-amber-400/80 tracking-wide"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    🏆 Pareggio! {bestDuos.length} coppie al primo posto
+                  </motion.div>
+                )}
+                {bestDuos.map((duo, index) => (
+                  <BestDuoCard 
+                    key={duo.players.join('-')} 
+                    players={duo.players} 
+                    wins={duo.wins} 
+                    delayBase={0.25 + (index * 0.1)} 
+                  />
+                ))}
+              </>
+            )}
           </div>
         </div>
         
