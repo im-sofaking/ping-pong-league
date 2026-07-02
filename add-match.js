@@ -171,7 +171,7 @@ async function main() {
       
       try {
         execSync('git add src/data/matches.json', { stdio: 'inherit' });
-        execSync(`git commit -m "Add match: ${tipo} - ${new Date().toLocaleDateString('it-IT')}"`, { stdio: 'inherit' });
+        execSync(`git commit -m "Add match - ${new Date().toLocaleDateString('it-IT')}"`, { stdio: 'inherit' });
         execSync('git push', { stdio: 'inherit' });
         
         console.log(`\n${colors.green}✅ Push completato! L'app si aggiornerà automaticamente.${colors.reset}\n`);
