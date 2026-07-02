@@ -6,19 +6,20 @@ I dati delle partite sono salvati in: **`public/data/matches.json`**
 
 ## 🔄 Come Aggiornare i Dati
 
-### Opzione 1: Modifica Locale (prima del deploy)
+### In Locale (durante lo sviluppo)
 1. Apri il file `public/data/matches.json`
 2. Modifica i dati (aggiungi partite, aggiorna vittorie, ecc.)
 3. Salva il file
-4. L'app si aggiornerà automaticamente in locale
+4. **Riavvia il dev server**: Ferma (`Ctrl+C`) e riavvia con `npm run dev`
+5. L'app si aggiornerà con i nuovi dati
 
-### Opzione 2: Dopo l'Hosting (GitHub/Lovable)
+### Dopo l'Hosting (GitHub/Netlify/Vercel)
 1. Vai su GitHub nel repository del progetto
 2. Naviga in `public/data/matches.json`
 3. Clicca su "Edit" (icona matita)
 4. Modifica i dati
 5. Fai commit delle modifiche
-6. L'app si aggiornerà automaticamente!
+6. L'app si aggiornerà automaticamente in 1-2 minuti!
 
 ## 📝 Struttura del JSON
 

@@ -12,6 +12,10 @@ import lucaBAvatar from "@/assets/avatars/luca-b.svg";
 import lucaVAvatar from "@/assets/avatars/luca-v.svg";
 import riccardoAvatar from "@/assets/avatars/riccardo.svg";
 
+// 🔥 IMPORT DATI DAL FILE JSON
+// Per aggiornare i dati: modifica public/data/matches.json
+import matchesData from "/data/matches.json";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -29,60 +33,12 @@ type Team = { name: string; wins: number; members: string[] };
 type SingleMatch = { player1: string; player2: string; score1: number; score2: number; date: string };
 type DoubleMatch = { team1: string[]; team2: string[]; score1: number; score2: number; date: string };
 
-// 🔥 DATI CARICATI DA FILE JSON
-// Per aggiornare i dati dopo l'hosting:
-// 1. Modifica il file: public/data/matches.json
-// 2. Fai commit e push su Git
-// 3. L'app si aggiornerà automaticamente!
-
-// Funzione per caricare i dati dal JSON
-async function loadMatchData() {
-  try {
-    const response = await fetch('/data/matches.json');
-    return await response.json();
-  } catch (error) {
-    console.error('Errore caricamento dati:', error);
-    return null;
-  }
-}
-
-// Dati di default (fallback se il JSON non si carica)
-const DEFAULT_DATA = {
-  players: [
-    { name: "Andrea", wins: 17 },
-    { name: "Carlotta", wins: 8 },
-    { name: "Davide", wins: 12 },
-    { name: "Gabri", wins: 10 },
-    { name: "Luca B", wins: 19 },
-    { name: "Luca V", wins: 15 },
-    { name: "Riccardo", wins: 14 },
-  ],
-  teams: [
-    { name: "Smash Bros", members: ["Luca B", "Riccardo"], wins: 15 },
-    { name: "Top Spin", members: ["Andrea", "Davide"], wins: 11 },
-    { name: "Net Ninjas", members: ["Gabri", "Luca V"], wins: 9 },
-    { name: "Backhand Kings", members: ["Luca B", "Andrea"], wins: 6 },
-  ],
-  singleMatches: [
-    { player1: "Luca B", player2: "Andrea", score1: 11, score2: 7, date: "02/07/2026" },
-    { player1: "Riccardo", player2: "Davide", score1: 11, score2: 9, date: "01/07/2026" },
-    { player1: "Andrea", player2: "Gabri", score1: 11, score2: 4, date: "30/06/2026" },
-    { player1: "Luca V", player2: "Luca B", score1: 8, score2: 11, date: "29/06/2026" },
-    { player1: "Davide", player2: "Andrea", score1: 11, score2: 13, date: "28/06/2026" },
-  ],
-  doubleMatches: [
-    { team1: ["Luca B", "Andrea"], team2: ["Davide", "Carlotta"], score1: 11, score2: 4, date: "02/07/2026" },
-    { team1: ["Riccardo", "Gabri"], team2: ["Luca B", "Andrea"], score1: 11, score2: 8, date: "01/07/2026" },
-    { team1: ["Davide", "Carlotta"], team2: ["Luca V", "Riccardo"], score1: 9, score2: 11, date: "30/06/2026" },
-    { team1: ["Luca B", "Andrea"], team2: ["Riccardo", "Davide"], score1: 11, score2: 7, date: "29/06/2026" },
-    { team1: ["Gabri", "Carlotta"], team2: ["Luca B", "Andrea"], score1: 6, score2: 11, date: "28/06/2026" },
-  ],
-};
-
-const PLAYERS: Player[] = DEFAULT_DATA.players;
-const TEAMS: Team[] = DEFAULT_DATA.teams;
-const SINGLE_MATCHES: SingleMatch[] = DEFAULT_DATA.singleMatches;
-const DOUBLE_MATCHES: DoubleMatch[] = DEFAULT_DATA.doubleMatches;
+// 🔥 DATI CARICATI DAL FILE JSON
+// Per aggiornare: modifica public/data/matches.json e riavvia il dev server
+const PLAYERS: Player[] = matchesData.players;
+const TEAMS: Team[] = matchesData.teams;
+const SINGLE_MATCHES: SingleMatch[] = matchesData.singleMatches;
+const DOUBLE_MATCHES: DoubleMatch[] = matchesData.doubleMatches;
 
 // Avatar locali personalizzati
 const LOCAL_AVATARS: Record<string, string> = {
