@@ -13,8 +13,8 @@ import lucaVAvatar from "@/assets/avatars/luca-v.svg";
 import riccardoAvatar from "@/assets/avatars/riccardo.svg";
 
 // 🔥 IMPORT DATI DAL FILE JSON
-// Per aggiornare i dati: modifica public/data/matches.json
-import matchesData from "/data/matches.json";
+// Per aggiornare i dati: modifica src/data/matches.json
+import matchesData from "@/data/matches.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
