@@ -22,6 +22,8 @@ I dati delle partite sono salvati in: **`src/data/matches.json`**
 
 ## 📝 Struttura del JSON
 
+Il file si trova in: **`src/data/matches.json`**
+
 ```json
 {
   "players": [
