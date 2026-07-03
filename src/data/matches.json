@@ -2,7 +2,7 @@
   "players": [
     {
       "name": "Andrea",
-      "wins": 2
+      "wins": 1
     },
     {
       "name": "Carlotta",
@@ -10,7 +10,7 @@
     },
     {
       "name": "Davide",
-      "wins": 1
+      "wins": 0
     },
     {
       "name": "Gabri",
@@ -44,7 +44,7 @@
         "Andrea",
         "Davide"
       ],
-      "wins": 1
+      "wins": 0
     },
     {
       "name": "Net Ninjas",
@@ -72,19 +72,5 @@
       "date": "02/07/2026"
     }
   ],
-  "doubleMatches": [
-    {
-      "team1": [
-        "Andrea",
-        "Davide"
-      ],
-      "team2": [
-        "Gabri",
-        "Carlotta"
-      ],
-      "score1": 11,
-      "score2": 3,
-      "date": "02/07/2026"
-    }
-  ]
+  "doubleMatches": []
 }
