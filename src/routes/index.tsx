@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { ReplyLogo } from "@/components/ReplyLogo";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // Import avatar locali
 import andreaAvatar from "@/assets/avatars/andrea.svg";
@@ -240,10 +241,12 @@ function LeaderboardCard({
   label,
   rows,
   delayBase = 0,
+  onPlayerClick,
 }: {
   label: string;
   rows: Row[];
   delayBase?: number;
+  onPlayerClick?: (playerName: string) => void;
 }) {
   const sorted = [...rows].sort((a, b) => b.wins - a.wins);
   const max = sorted[0]?.wins ?? 1;
@@ -270,9 +273,10 @@ function LeaderboardCard({
               initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: delayBase + 0.25 + i * 0.07, duration: 0.5, ease: "easeOut" }}
+              onClick={() => !r.subtitle && onPlayerClick?.(r.title)}
               className={`group relative flex items-center gap-3 rounded-2xl border border-white/5 p-3 transition hover:bg-white/[0.06] md:gap-4 md:p-4 ${
                 isTop3 ? `ring-1 ${MEDAL_RING[i]}` : "bg-white/[0.03]"
-              }`}
+              } ${!r.subtitle && onPlayerClick ? 'cursor-pointer' : ''}`}
             >
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/5 text-sm font-semibold text-white/80">
                 {isTop3 ? <span className="text-xl">{MEDALS[i]}</span> : <span className="text-xs text-white/40">{i + 1}</span>}
@@ -439,14 +443,17 @@ function MatchesCard({
   );
 }
 
-function StatPill({ label, value, delay = 0 }: { label: string; value: number; delay?: number }) {
+function StatPill({ label, value, delay = 0, onClick }: { label: string; value: number; delay?: number; onClick?: () => void }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-center backdrop-blur-xl">
+    <button
+      onClick={onClick}
+      className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-center backdrop-blur-xl transition-all hover:bg-white/[0.08] hover:border-white/20 hover:scale-105 cursor-pointer"
+    >
       <div className="text-2xl font-semibold tabular-nums text-white md:text-3xl">
         <AnimatedNumber value={value} delay={delay} />
       </div>
       <div className="mt-0.5 text-[10px] tracking-[0.25em] text-white/50 uppercase">{label}</div>
-    </div>
+    </button>
   );
 }
 
@@ -495,6 +502,9 @@ function BestDuoCard({ players, wins, delayBase = 0 }: { players: string[]; wins
 }
 
 function Leaderboard() {
+  const [dialogView, setDialogView] = useState<'all' | 'singles' | 'doubles' | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+
   const singlesRows: Row[] = useMemo(
     () => PLAYERS.map((p) => ({ key: p.name, title: p.name, avatars: [p.name], wins: p.wins })),
     [],
@@ -514,6 +524,28 @@ function Leaderboard() {
   const singlesGames = SINGLE_MATCHES.length;
   const doublesGames = DOUBLE_MATCHES.length;
   const totalGames = singlesGames + doublesGames;
+
+  // Filtra le partite per il dialog
+  const dialogMatches = useMemo(() => {
+    if (dialogView === 'singles') return { singles: SINGLE_MATCHES, doubles: [] };
+    if (dialogView === 'doubles') return { singles: [], doubles: DOUBLE_MATCHES };
+    if (dialogView === 'all') return { singles: SINGLE_MATCHES, doubles: DOUBLE_MATCHES };
+    return { singles: [], doubles: [] };
+  }, [dialogView]);
+
+  // Filtra le partite del giocatore selezionato
+  const playerMatches = useMemo(() => {
+    if (!selectedPlayer) return { singles: [], doubles: [] };
+    
+    const singles = SINGLE_MATCHES.filter(
+      m => m.player1 === selectedPlayer || m.player2 === selectedPlayer
+    );
+    const doubles = DOUBLE_MATCHES.filter(
+      m => m.team1.includes(selectedPlayer) || m.team2.includes(selectedPlayer)
+    );
+    
+    return { singles, doubles };
+  }, [selectedPlayer]);
 
   // Calcola le coppie migliori dai double matches
   const bestDuos = useMemo(() => {
@@ -577,14 +609,14 @@ function Leaderboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.6 }}
       >
-        <StatPill label="Total games" value={totalGames} delay={0.4} />
-        <StatPill label="Singles" value={singlesGames} delay={0.5} />
-        <StatPill label="Doubles" value={doublesGames} delay={0.6} />
+        <StatPill label="Total games" value={totalGames} delay={0.4} onClick={() => setDialogView('all')} />
+        <StatPill label="Singles" value={singlesGames} delay={0.5} onClick={() => setDialogView('singles')} />
+        <StatPill label="Doubles" value={doublesGames} delay={0.6} onClick={() => setDialogView('doubles')} />
       </motion.div>
 
       <div className="space-y-6">
         <div className="grid gap-6 md:grid-cols-[1fr_auto]">
-          <LeaderboardCard label="Classifica" rows={singlesRows} delayBase={0.2} />
+          <LeaderboardCard label="Classifica" rows={singlesRows} delayBase={0.2} onPlayerClick={setSelectedPlayer} />
           <div className="md:w-80 space-y-4">
             {bestDuos.length === 0 ? (
               <motion.div
@@ -627,8 +659,8 @@ function Leaderboard() {
         </div>
         
         <div className="grid gap-6 md:grid-cols-2">
-          <MatchesCard label="Single Matches" matches={SINGLE_MATCHES} type="single" delayBase={0.35} />
-          <MatchesCard label="Double Matches" matches={DOUBLE_MATCHES} type="double" delayBase={0.5} />
+          <MatchesCard label="Single Matches" matches={SINGLE_MATCHES.slice(0, 5)} type="single" delayBase={0.35} />
+          <MatchesCard label="Double Matches" matches={DOUBLE_MATCHES.slice(0, 5)} type="double" delayBase={0.5} />
         </div>
       </div>
 
@@ -636,6 +668,310 @@ function Leaderboard() {
         <span>{PLAYERS.length} players · {TEAMS.length} teams</span>
         <span>Updated just now</span>
       </div>
+
+      {/* Dialog per tutte le partite */}
+      <Dialog open={dialogView !== null} onOpenChange={(open) => !open && setDialogView(null)}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-[#0a0a14]/95 backdrop-blur-2xl border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-semibold text-white">
+              {dialogView === 'all' && '🏓 Tutte le Partite'}
+              {dialogView === 'singles' && '🎯 Partite Singole'}
+              {dialogView === 'doubles' && '👥 Partite Doppie'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 mt-4">
+            {dialogMatches.singles.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium tracking-wider text-white/60 uppercase mb-3">
+                  Singolo ({dialogMatches.singles.length})
+                </h3>
+                <div className="space-y-2">
+                  {dialogMatches.singles.map((match, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.03] p-3 md:gap-4 md:p-4"
+                    >
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <PlayerAvatar name={match.player1} size={28} />
+                            <span className={`text-sm font-medium ${match.score1 > match.score2 ? 'text-white' : 'text-white/50'}`}>
+                              {match.player1}
+                            </span>
+                          </div>
+                          <span className={`text-lg font-semibold tabular-nums ${match.score1 > match.score2 ? 'text-white' : 'text-white/40'}`}>
+                            {match.score1}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <PlayerAvatar name={match.player2} size={28} />
+                            <span className={`text-sm font-medium ${match.score2 > match.score1 ? 'text-white' : 'text-white/50'}`}>
+                              {match.player2}
+                            </span>
+                          </div>
+                          <span className={`text-lg font-semibold tabular-nums ${match.score2 > match.score1 ? 'text-white' : 'text-white/40'}`}>
+                            {match.score2}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[10px] tracking-wider text-white/40">
+                          {match.date}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {dialogMatches.doubles.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium tracking-wider text-white/60 uppercase mb-3">
+                  Doppio ({dialogMatches.doubles.length})
+                </h3>
+                <div className="space-y-2">
+                  {dialogMatches.doubles.map((match, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.03] p-3 md:gap-4 md:p-4"
+                    >
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="flex -space-x-2">
+                              {match.team1.map((player) => (
+                                <PlayerAvatar key={player} name={player} size={28} />
+                              ))}
+                            </div>
+                            <span className={`text-sm font-medium ${match.score1 > match.score2 ? 'text-white' : 'text-white/50'}`}>
+                              {match.team1.join(" & ")}
+                            </span>
+                          </div>
+                          <span className={`text-lg font-semibold tabular-nums ${match.score1 > match.score2 ? 'text-white' : 'text-white/40'}`}>
+                            {match.score1}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="flex -space-x-2">
+                              {match.team2.map((player) => (
+                                <PlayerAvatar key={player} name={player} size={28} />
+                              ))}
+                            </div>
+                            <span className={`text-sm font-medium ${match.score2 > match.score1 ? 'text-white' : 'text-white/50'}`}>
+                              {match.team2.join(" & ")}
+                            </span>
+                          </div>
+                          <span className={`text-lg font-semibold tabular-nums ${match.score2 > match.score1 ? 'text-white' : 'text-white/40'}`}>
+                            {match.score2}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[10px] tracking-wider text-white/40">
+                          {match.date}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {dialogMatches.singles.length === 0 && dialogMatches.doubles.length === 0 && (
+              <div className="text-center py-12 text-white/40">
+                <p>Nessuna partita ancora giocata</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog per le partite del giocatore */}
+      <Dialog open={selectedPlayer !== null} onOpenChange={(open) => !open && setSelectedPlayer(null)}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-[#0a0a14]/95 backdrop-blur-2xl border-white/10">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <PlayerAvatar name={selectedPlayer || ''} size={48} />
+              <DialogTitle className="text-2xl font-semibold text-white">
+                Partite di {selectedPlayer}
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+          
+          <div className="space-y-6 mt-4">
+            {playerMatches.singles.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium tracking-wider text-white/60 uppercase mb-3">
+                  Partite Singole ({playerMatches.singles.length})
+                </h3>
+                <div className="space-y-2">
+                  {playerMatches.singles.map((match, i) => {
+                    const isPlayer1 = match.player1 === selectedPlayer;
+                    const playerScore = isPlayer1 ? match.score1 : match.score2;
+                    const opponentScore = isPlayer1 ? match.score2 : match.score1;
+                    const opponent = isPlayer1 ? match.player2 : match.player1;
+                    const won = playerScore > opponentScore;
+                    
+                    return (
+                      <div
+                        key={i}
+                        className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.03] p-3 md:gap-4 md:p-4"
+                      >
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <PlayerAvatar name={selectedPlayer || ''} size={28} />
+                              <span className={`text-sm font-medium ${won ? 'text-white' : 'text-white/50'}`}>
+                                {selectedPlayer}
+                              </span>
+                            </div>
+                            <span className={`text-lg font-semibold tabular-nums ${won ? 'text-white' : 'text-white/40'}`}>
+                              {playerScore}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <PlayerAvatar name={opponent} size={28} />
+                              <span className={`text-sm font-medium ${!won ? 'text-white' : 'text-white/50'}`}>
+                                {opponent}
+                              </span>
+                            </div>
+                            <span className={`text-lg font-semibold tabular-nums ${!won ? 'text-white' : 'text-white/40'}`}>
+                              {opponentScore}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-[10px] tracking-wider text-white/40 mb-1">
+                            {match.date}
+                          </div>
+                          <div className={`text-xs font-medium ${won ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {won ? '✓ WIN' : '✗ LOSS'}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {playerMatches.doubles.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium tracking-wider text-white/60 uppercase mb-3">
+                  Partite Doppie ({playerMatches.doubles.length})
+                </h3>
+                <div className="space-y-2">
+                  {playerMatches.doubles.map((match, i) => {
+                    const isTeam1 = match.team1.includes(selectedPlayer!);
+                    const playerTeam = isTeam1 ? match.team1 : match.team2;
+                    const opponentTeam = isTeam1 ? match.team2 : match.team1;
+                    const playerScore = isTeam1 ? match.score1 : match.score2;
+                    const opponentScore = isTeam1 ? match.score2 : match.score1;
+                    const won = playerScore > opponentScore;
+                    const partner = playerTeam.find(p => p !== selectedPlayer);
+                    
+                    return (
+                      <div
+                        key={i}
+                        className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.03] p-3 md:gap-4 md:p-4"
+                      >
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <div className="flex -space-x-2">
+                                {playerTeam.map((player) => (
+                                  <PlayerAvatar key={player} name={player} size={28} />
+                                ))}
+                              </div>
+                              <span className={`text-sm font-medium ${won ? 'text-white' : 'text-white/50'}`}>
+                                {selectedPlayer} & {partner}
+                              </span>
+                            </div>
+                            <span className={`text-lg font-semibold tabular-nums ${won ? 'text-white' : 'text-white/40'}`}>
+                              {playerScore}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <div className="flex -space-x-2">
+                                {opponentTeam.map((player) => (
+                                  <PlayerAvatar key={player} name={player} size={28} />
+                                ))}
+                              </div>
+                              <span className={`text-sm font-medium ${!won ? 'text-white' : 'text-white/50'}`}>
+                                {opponentTeam.join(" & ")}
+                              </span>
+                            </div>
+                            <span className={`text-lg font-semibold tabular-nums ${!won ? 'text-white' : 'text-white/40'}`}>
+                              {opponentScore}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-[10px] tracking-wider text-white/40 mb-1">
+                            {match.date}
+                          </div>
+                          <div className={`text-xs font-medium ${won ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {won ? '✓ WIN' : '✗ LOSS'}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {playerMatches.singles.length === 0 && playerMatches.doubles.length === 0 && (
+              <div className="text-center py-12 text-white/40">
+                <p>Nessuna partita ancora giocata</p>
+              </div>
+            )}
+
+            <div className="pt-4 border-t border-white/10">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-white">
+                    {playerMatches.singles.length + playerMatches.doubles.length}
+                  </div>
+                  <div className="text-xs text-white/50 uppercase tracking-wider">Partite</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-emerald-400">
+                    {playerMatches.singles.filter(m => 
+                      (m.player1 === selectedPlayer && m.score1 > m.score2) ||
+                      (m.player2 === selectedPlayer && m.score2 > m.score1)
+                    ).length +
+                    playerMatches.doubles.filter(m =>
+                      (m.team1.includes(selectedPlayer!) && m.score1 > m.score2) ||
+                      (m.team2.includes(selectedPlayer!) && m.score2 > m.score1)
+                    ).length}
+                  </div>
+                  <div className="text-xs text-white/50 uppercase tracking-wider">Vittorie</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-red-400">
+                    {playerMatches.singles.filter(m => 
+                      (m.player1 === selectedPlayer && m.score1 < m.score2) ||
+                      (m.player2 === selectedPlayer && m.score2 < m.score1)
+                    ).length +
+                    playerMatches.doubles.filter(m =>
+                      (m.team1.includes(selectedPlayer!) && m.score1 < m.score2) ||
+                      (m.team2.includes(selectedPlayer!) && m.score2 < m.score1)
+                    ).length}
+                  </div>
+                  <div className="text-xs text-white/50 uppercase tracking-wider">Sconfitte</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
