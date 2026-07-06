@@ -235,6 +235,7 @@ type Row = {
   subtitle?: string;
   avatars: string[];
   wins: number;
+  totalMatches?: number;
 };
 
 function LeaderboardCard({
@@ -291,7 +292,11 @@ function LeaderboardCard({
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
                   <p className="truncate text-sm font-medium text-white md:text-base">{r.title}</p>
-                  <p className="text-xs text-white/40">{((r.wins / max) * 100).toFixed(0)}%</p>
+                  <p className="text-xs text-white/40">
+                    {r.totalMatches && r.totalMatches > 0
+                      ? `${((r.wins / r.totalMatches) * 100).toFixed(0)}%`
+                      : '—'}
+                  </p>
                 </div>
                 {r.subtitle && (
                   <p className="truncate text-[11px] text-white/40">{r.subtitle}</p>
@@ -506,7 +511,24 @@ function Leaderboard() {
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
 
   const singlesRows: Row[] = useMemo(
-    () => PLAYERS.map((p) => ({ key: p.name, title: p.name, avatars: [p.name], wins: p.wins })),
+    () => PLAYERS.map((p) => {
+      // Calcola quante partite ha giocato questo giocatore
+      const singleMatchesPlayed = SINGLE_MATCHES.filter(
+        m => m.player1 === p.name || m.player2 === p.name
+      ).length;
+      const doubleMatchesPlayed = DOUBLE_MATCHES.filter(
+        m => m.team1.includes(p.name) || m.team2.includes(p.name)
+      ).length;
+      const totalMatches = singleMatchesPlayed + doubleMatchesPlayed;
+      
+      return { 
+        key: p.name, 
+        title: p.name, 
+        avatars: [p.name], 
+        wins: p.wins,
+        totalMatches
+      };
+    }),
     [],
   );
   const doublesRows: Row[] = useMemo(
