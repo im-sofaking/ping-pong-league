@@ -2,7 +2,7 @@
   "players": [
     {
       "name": "Andrea",
-      "wins": 7
+      "wins": 8
     },
     {
       "name": "Carlotta",
@@ -22,7 +22,7 @@
     },
     {
       "name": "Luca V",
-      "wins": 6
+      "wins": 7
     },
     {
       "name": "Riccardo",
@@ -64,6 +64,20 @@
     }
   ],
   "singleMatches": [
+    {
+      "player1": "Andrea",
+      "player2": "Luca V",
+      "score1": 21,
+      "score2": 18,
+      "date": "06/07/2026"
+    },
+    {
+      "player1": "Andrea",
+      "player2": "Luca V",
+      "score1": 18,
+      "score2": 21,
+      "date": "06/07/2026"
+    },
     {
       "player1": "Andrea",
       "player2": "Luca V",
