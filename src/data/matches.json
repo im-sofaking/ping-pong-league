@@ -10,7 +10,7 @@
     },
     {
       "name": "Davide",
-      "wins": 1
+      "wins": 2
     },
     {
       "name": "Gabri",
@@ -64,6 +64,13 @@
     }
   ],
   "singleMatches": [
+    {
+      "player1": "Davide",
+      "player2": "Luca B",
+      "score1": 21,
+      "score2": 17,
+      "date": "07/07/2026"
+    },
     {
       "player1": "Andrea",
       "player2": "Luca V",
