@@ -18,11 +18,11 @@
     },
     {
       "name": "Luca B",
-      "wins": 3
+      "wins": 4
     },
     {
       "name": "Luca V",
-      "wins": 7
+      "wins": 9
     },
     {
       "name": "Riccardo",
@@ -64,6 +64,27 @@
     }
   ],
   "singleMatches": [
+    {
+      "player1": "Luca B",
+      "player2": "Luca V",
+      "score1": 9,
+      "score2": 11,
+      "date": "10/07/2026"
+    },
+    {
+      "player1": "Luca B",
+      "player2": "Luca V",
+      "score1": 9,
+      "score2": 11,
+      "date": "10/07/2026"
+    },
+    {
+      "player1": "Luca B",
+      "player2": "Luca V",
+      "score1": 11,
+      "score2": 8,
+      "date": "10/07/2026"
+    },
     {
       "player1": "Davide",
       "player2": "Luca B",
