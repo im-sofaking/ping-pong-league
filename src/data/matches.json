@@ -14,7 +14,7 @@
     },
     {
       "name": "Gabri",
-      "wins": 0
+      "wins": 2
     },
     {
       "name": "Luca B",
@@ -22,11 +22,11 @@
     },
     {
       "name": "Luca V",
-      "wins": 11
+      "wins": 14
     },
     {
       "name": "Riccardo",
-      "wins": 0
+      "wins": 1
     }
   ],
   "teams": [
@@ -64,6 +64,48 @@
     }
   ],
   "singleMatches": [
+    {
+      "player1": "Gabri",
+      "player2": "Davide",
+      "score1": 21,
+      "score2": 19,
+      "date": "23/07/2026"
+    },
+    {
+      "player1": "Andrea",
+      "player2": "Luca V",
+      "score1": 19,
+      "score2": 21,
+      "date": "23/07/2026"
+    },
+    {
+      "player1": "Andrea",
+      "player2": "Luca V",
+      "score1": 18,
+      "score2": 21,
+      "date": "23/07/2026"
+    },
+    {
+      "player1": "Riccardo",
+      "player2": "Luca V",
+      "score1": 5,
+      "score2": 11,
+      "date": "23/07/2026"
+    },
+    {
+      "player1": "Riccardo",
+      "player2": "Gabri",
+      "score1": 10,
+      "score2": 21,
+      "date": "23/07/2026"
+    },
+    {
+      "player1": "Riccardo",
+      "player2": "Davide",
+      "score1": 23,
+      "score2": 21,
+      "date": "23/07/2026"
+    },
     {
       "player1": "Andrea",
       "player2": "Luca V",
