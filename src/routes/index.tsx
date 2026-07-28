@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { ReplyLogo } from "@/components/ReplyLogo";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 // Import avatar locali
 import andreaAvatar from "@/assets/avatars/andrea.svg";
@@ -506,6 +507,46 @@ function BestDuoCard({ players, wins, delayBase = 0 }: { players: string[]; wins
   );
 }
 
+function HotStreakCard({ player, streak, delayBase = 0 }: { player: string; streak: number; delayBase?: number }) {
+  return (
+    <motion.div
+      className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-2xl md:p-6"
+      style={{ boxShadow: "0 30px 80px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)" }}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: delayBase, duration: 0.6 }}
+    >
+      <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-orange-500/15 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-red-500/15 blur-3xl" />
+      
+      <div className="relative">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-[11px] font-medium tracking-[0.3em] text-white/60 uppercase">Hot Streak</h2>
+          <span className="text-xl">🔥</span>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <PlayerAvatar name={player} size={48} />
+          
+          <div className="flex-1">
+            <p className="text-lg font-semibold text-white md:text-xl">
+              {player}
+            </p>
+            <p className="text-sm text-white/50">In forma smagliante</p>
+          </div>
+          
+          <div className="text-right">
+            <div className="text-3xl font-bold tabular-nums text-orange-400">
+              <AnimatedNumber value={streak} delay={delayBase + 0.2} />
+            </div>
+            <div className="text-[10px] tracking-widest text-white/40 uppercase">vittorie</div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 function Leaderboard() {
   const [dialogView, setDialogView] = useState<'all' | 'singles' | 'doubles' | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
@@ -594,6 +635,71 @@ function Leaderboard() {
     return duos.filter(d => d.wins === maxWins);
   }, []);
 
+  // Calcola la hot streak (striscia di vittorie consecutive corrente)
+  const hotStreak = useMemo(() => {
+    // Combina tutte le partite con informazioni sul vincitore
+    const allMatches = [
+      ...SINGLE_MATCHES.map(m => ({
+        date: m.date,
+        winner: m.score1 > m.score2 ? m.player1 : m.player2
+      })),
+      ...DOUBLE_MATCHES.map(m => {
+        const winningTeam = m.score1 > m.score2 ? m.team1 : m.team2;
+        return winningTeam.map(player => ({
+          date: m.date,
+          winner: player
+        }));
+      }).flat()
+    ];
+
+    // Ordina per data (più recente prima)
+    allMatches.sort((a, b) => {
+      const [dayA, monthA, yearA] = a.date.split('/').map(Number);
+      const [dayB, monthB, yearB] = b.date.split('/').map(Number);
+      const dateA = new Date(yearA, monthA - 1, dayA);
+      const dateB = new Date(yearB, monthB - 1, dayB);
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    // Calcola streak per ogni giocatore
+    const streaks = new Map<string, number>();
+    
+    PLAYERS.forEach(player => {
+      let streak = 0;
+      // Conta vittorie consecutive dall'ultima partita
+      for (const match of allMatches) {
+        if (match.winner === player.name) {
+          streak++;
+        } else {
+          // Se il giocatore ha partecipato a questa partita ma ha perso, la streak si interrompe
+          const participated = SINGLE_MATCHES.some(m => 
+            (m.player1 === player.name || m.player2 === player.name) && m.date === match.date
+          ) || DOUBLE_MATCHES.some(m =>
+            (m.team1.includes(player.name) || m.team2.includes(player.name)) && m.date === match.date
+          );
+          
+          if (participated) break;
+        }
+      }
+      if (streak > 0) {
+        streaks.set(player.name, streak);
+      }
+    });
+
+    // Trova il giocatore con la streak più alta
+    let maxStreak = 0;
+    let hotPlayer = '';
+    
+    streaks.forEach((streak, player) => {
+      if (streak > maxStreak) {
+        maxStreak = streak;
+        hotPlayer = player;
+      }
+    });
+
+    return maxStreak > 0 ? { player: hotPlayer, streak: maxStreak } : null;
+  }, []);
+
   return (
     <motion.div
       className="relative z-10 w-full max-w-3xl px-4 py-10"
@@ -676,6 +782,15 @@ function Leaderboard() {
                   />
                 ))}
               </>
+            )}
+            
+            {/* Hot Streak Card */}
+            {hotStreak && (
+              <HotStreakCard 
+                player={hotStreak.player} 
+                streak={hotStreak.streak} 
+                delayBase={0.35} 
+              />
             )}
           </div>
         </div>
@@ -814,7 +929,7 @@ function Leaderboard() {
 
       {/* Dialog per le partite del giocatore */}
       <Dialog open={selectedPlayer !== null} onOpenChange={(open) => !open && setSelectedPlayer(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-[#0a0a14]/95 backdrop-blur-2xl border-white/10">
+        <DialogContent className="max-w-6xl max-h-[85vh] overflow-y-auto bg-[#0a0a14]/95 backdrop-blur-2xl border-white/10">
           <DialogHeader>
             <div className="flex items-center gap-3">
               <PlayerAvatar name={selectedPlayer || ''} size={48} />
@@ -824,7 +939,9 @@ function Leaderboard() {
             </div>
           </DialogHeader>
           
-          <div className="space-y-6 mt-4">
+          <div className="grid md:grid-cols-2 gap-6 mt-4">
+            {/* Colonna sinistra - Partite */}
+            <div className="space-y-6 overflow-y-auto max-h-[calc(85vh-150px)]">
             {playerMatches.singles.length > 0 && (
               <div>
                 <h3 className="text-sm font-medium tracking-wider text-white/60 uppercase mb-3">
@@ -954,42 +1071,128 @@ function Leaderboard() {
                 <p>Nessuna partita ancora giocata</p>
               </div>
             )}
+            </div>
 
-            <div className="pt-4 border-t border-white/10">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-white">
-                    {playerMatches.singles.length + playerMatches.doubles.length}
+            {/* Colonna destra - Grafico e statistiche */}
+            <div className="space-y-6">
+              {/* Statistiche */}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
+                <h3 className="text-sm font-medium tracking-wider text-white/60 uppercase mb-4">Statistiche</h3>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-white">
+                      {playerMatches.singles.length + playerMatches.doubles.length}
+                    </div>
+                    <div className="text-xs text-white/50 uppercase tracking-wider">Partite</div>
                   </div>
-                  <div className="text-xs text-white/50 uppercase tracking-wider">Partite</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-emerald-400">
-                    {playerMatches.singles.filter(m => 
-                      (m.player1 === selectedPlayer && m.score1 > m.score2) ||
-                      (m.player2 === selectedPlayer && m.score2 > m.score1)
-                    ).length +
-                    playerMatches.doubles.filter(m =>
-                      (m.team1.includes(selectedPlayer!) && m.score1 > m.score2) ||
-                      (m.team2.includes(selectedPlayer!) && m.score2 > m.score1)
-                    ).length}
+                  <div>
+                    <div className="text-2xl font-bold text-emerald-400">
+                      {playerMatches.singles.filter(m => 
+                        (m.player1 === selectedPlayer && m.score1 > m.score2) ||
+                        (m.player2 === selectedPlayer && m.score2 > m.score1)
+                      ).length +
+                      playerMatches.doubles.filter(m =>
+                        (m.team1.includes(selectedPlayer!) && m.score1 > m.score2) ||
+                        (m.team2.includes(selectedPlayer!) && m.score2 > m.score1)
+                      ).length}
+                    </div>
+                    <div className="text-xs text-white/50 uppercase tracking-wider">Vittorie</div>
                   </div>
-                  <div className="text-xs text-white/50 uppercase tracking-wider">Vittorie</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-red-400">
-                    {playerMatches.singles.filter(m => 
-                      (m.player1 === selectedPlayer && m.score1 < m.score2) ||
-                      (m.player2 === selectedPlayer && m.score2 < m.score1)
-                    ).length +
-                    playerMatches.doubles.filter(m =>
-                      (m.team1.includes(selectedPlayer!) && m.score1 < m.score2) ||
-                      (m.team2.includes(selectedPlayer!) && m.score2 < m.score1)
-                    ).length}
+                  <div>
+                    <div className="text-2xl font-bold text-red-400">
+                      {playerMatches.singles.filter(m => 
+                        (m.player1 === selectedPlayer && m.score1 < m.score2) ||
+                        (m.player2 === selectedPlayer && m.score2 < m.score1)
+                      ).length +
+                      playerMatches.doubles.filter(m =>
+                        (m.team1.includes(selectedPlayer!) && m.score1 < m.score2) ||
+                        (m.team2.includes(selectedPlayer!) && m.score2 < m.score1)
+                      ).length}
+                    </div>
+                    <div className="text-xs text-white/50 uppercase tracking-wider">Sconfitte</div>
                   </div>
-                  <div className="text-xs text-white/50 uppercase tracking-wider">Sconfitte</div>
                 </div>
               </div>
+
+              {/* Grafico andamento */}
+              {(() => {
+                // Combina tutte le partite e ordina per data
+                const allMatches = [
+                  ...playerMatches.singles.map(m => ({
+                    date: m.date,
+                    won: (m.player1 === selectedPlayer && m.score1 > m.score2) ||
+                         (m.player2 === selectedPlayer && m.score2 > m.score1)
+                  })),
+                  ...playerMatches.doubles.map(m => ({
+                    date: m.date,
+                    won: (m.team1.includes(selectedPlayer!) && m.score1 > m.score2) ||
+                         (m.team2.includes(selectedPlayer!) && m.score2 > m.score1)
+                  }))
+                ].sort((a, b) => {
+                  const [dayA, monthA, yearA] = a.date.split('/').map(Number);
+                  const [dayB, monthB, yearB] = b.date.split('/').map(Number);
+                  const dateA = new Date(yearA, monthA - 1, dayA);
+                  const dateB = new Date(yearB, monthB - 1, dayB);
+                  return dateA.getTime() - dateB.getTime();
+                });
+
+                // Calcola percentuale progressiva
+                let wins = 0;
+                let total = 0;
+                const chartData = allMatches.map(match => {
+                  total++;
+                  if (match.won) wins++;
+                  return {
+                    date: match.date,
+                    winRate: Math.round((wins / total) * 100)
+                  };
+                });
+
+                return chartData.length > 0 ? (
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl">
+                    <h3 className="text-sm font-medium tracking-wider text-white/60 uppercase mb-4">
+                      Andamento % Vittorie
+                    </h3>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                        <XAxis 
+                          dataKey="date" 
+                          stroke="rgba(255,255,255,0.4)" 
+                          fontSize={10}
+                          angle={-45}
+                          textAnchor="end"
+                          height={60}
+                        />
+                        <YAxis 
+                          stroke="rgba(255,255,255,0.4)" 
+                          fontSize={12}
+                          domain={[0, 100]}
+                          ticks={[0, 25, 50, 75, 100]}
+                          tickFormatter={(value) => `${value}%`}
+                        />
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: 'rgba(10, 10, 20, 0.95)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '8px',
+                            color: '#fff'
+                          }}
+                          formatter={(value: number) => [`${value}%`, 'Win Rate']}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="winRate" 
+                          stroke="#10b981" 
+                          strokeWidth={2}
+                          dot={{ fill: '#10b981', r: 4 }}
+                          activeDot={{ r: 6 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : null;
+              })()}
             </div>
           </div>
         </DialogContent>
