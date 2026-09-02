@@ -18,7 +18,7 @@
     },
     {
       "name": "Luca B",
-      "wins": 5
+      "wins": 7
     },
     {
       "name": "Luca V",
@@ -26,7 +26,7 @@
     },
     {
       "name": "Riccardo",
-      "wins": 2
+      "wins": 4
     }
   ],
   "teams": [
@@ -36,7 +36,7 @@
         "Luca B",
         "Riccardo"
       ],
-      "wins": 0
+      "wins": 2
     },
     {
       "name": "Top Spin",
@@ -339,6 +339,32 @@
     }
   ],
   "doubleMatches": [
+    {
+      "team1": [
+        "Andrea",
+        "Carlotta"
+      ],
+      "team2": [
+        "Luca B",
+        "Riccardo"
+      ],
+      "score1": 19,
+      "score2": 21,
+      "date": "02/09/2026"
+    },
+    {
+      "team1": [
+        "Andrea",
+        "Carlotta"
+      ],
+      "team2": [
+        "Luca B",
+        "Riccardo"
+      ],
+      "score1": 18,
+      "score2": 21,
+      "date": "02/09/2026"
+    },
     {
       "team1": [
         "Andrea",
