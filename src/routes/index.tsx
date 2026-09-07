@@ -532,7 +532,7 @@ function HotStreakCard({ player, streak, delayBase = 0 }: { player: string; stre
             <p className="text-lg font-semibold text-white md:text-xl">
               {player}
             </p>
-            <p className="text-sm text-white/50">In forma smagliante</p>
+            <p className="text-sm text-white/50">Vittorie negli ultimi 7 giorni</p>
           </div>
           
           <div className="text-right">
@@ -547,9 +547,104 @@ function HotStreakCard({ player, streak, delayBase = 0 }: { player: string; stre
   );
 }
 
+function HeadToHeadCard({
+  player1,
+  player2,
+  onPlayer1Change,
+  onPlayer2Change,
+  matches,
+  delayBase = 0,
+}: {
+  player1: string;
+  player2: string;
+  onPlayer1Change: (player: string) => void;
+  onPlayer2Change: (player: string) => void;
+  matches: SingleMatch[];
+  delayBase?: number;
+}) {
+  const player1Wins = matches.filter((match) => {
+    const winner = match.score1 > match.score2 ? match.player1 : match.player2;
+    return winner === player1;
+  }).length;
+  const player2Wins = matches.length - player1Wins;
+  const advantage = player1Wins === player2Wins
+    ? "Parità"
+    : `${player1Wins > player2Wins ? player1 : player2} è in vantaggio`;
+
+  return (
+    <motion.div
+      className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-2xl md:p-6"
+      style={{ boxShadow: "0 30px 80px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)" }}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: delayBase, duration: 0.6 }}
+    >
+      <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
+      <div className="relative">
+        <h2 className="mb-4 text-[11px] font-medium tracking-[0.3em] text-white/60 uppercase">Scontri diretti</h2>
+
+        <div className="grid grid-cols-2 gap-2">
+          {[{ value: player1, onChange: onPlayer1Change }, { value: player2, onChange: onPlayer2Change }].map((select, index) => (
+            <select
+              key={index}
+              value={select.value}
+              onChange={(event) => select.onChange(event.target.value)}
+              className="min-w-0 rounded-xl border border-white/10 bg-black/20 px-2 py-2 text-xs text-white outline-none transition focus:border-cyan-300/50"
+              aria-label={`Player ${index + 1}`}
+            >
+              {PLAYERS.map((player) => (
+                <option key={player.name} value={player.name} className="bg-[#10101c]">
+                  {player.name}
+                </option>
+              ))}
+            </select>
+          ))}
+        </div>
+
+        <div className="my-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-center">
+          <div>
+            <div className="text-2xl font-bold tabular-nums text-white">{player1Wins}</div>
+            <div className="truncate text-[10px] text-white/40">{player1}</div>
+          </div>
+          <span className="text-[10px] tracking-widest text-white/30 uppercase">vs</span>
+          <div>
+            <div className="text-2xl font-bold tabular-nums text-white">{player2Wins}</div>
+            <div className="truncate text-[10px] text-white/40">{player2}</div>
+          </div>
+        </div>
+
+        {player1 !== player2 && matches.length > 0 && (
+          <p className="mb-3 text-center text-[11px] tracking-wide text-cyan-300/80">{advantage}</p>
+        )}
+
+        {player1 === player2 ? (
+          <p className="text-center text-xs text-white/40">Seleziona due player diversi</p>
+        ) : matches.length === 0 ? (
+          <p className="text-center text-xs text-white/40">Nessuno scontro in singolo</p>
+        ) : (
+          <div className="max-h-32 space-y-1.5 overflow-y-auto pr-1">
+            {matches.map((match, index) => {
+              const player1Score = match.player1 === player1 ? match.score1 : match.score2;
+              const player2Score = match.player1 === player1 ? match.score2 : match.score1;
+              return (
+                <div key={`${match.date}-${index}`} className="flex items-center justify-between rounded-lg bg-white/[0.03] px-2.5 py-1.5 text-xs">
+                  <span className="text-white/40">{match.date}</span>
+                  <span className="font-medium tabular-nums text-white/80">{player1Score} - {player2Score}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
 function Leaderboard() {
   const [dialogView, setDialogView] = useState<'all' | 'singles' | 'doubles' | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+  const [headToHeadPlayer1, setHeadToHeadPlayer1] = useState(PLAYERS[0]?.name ?? '');
+  const [headToHeadPlayer2, setHeadToHeadPlayer2] = useState(PLAYERS[1]?.name ?? '');
 
   const singlesRows: Row[] = useMemo(
     () => PLAYERS.map((p) => {
@@ -635,9 +730,17 @@ function Leaderboard() {
     return duos.filter(d => d.wins === maxWins);
   }, []);
 
-  // Calcola la hot streak (striscia di vittorie consecutive corrente)
+  const headToHeadMatches = useMemo(() => {
+    if (!headToHeadPlayer1 || !headToHeadPlayer2 || headToHeadPlayer1 === headToHeadPlayer2) return [];
+
+    return SINGLE_MATCHES.filter((match) =>
+      (match.player1 === headToHeadPlayer1 && match.player2 === headToHeadPlayer2) ||
+      (match.player1 === headToHeadPlayer2 && match.player2 === headToHeadPlayer1)
+    );
+  }, [headToHeadPlayer1, headToHeadPlayer2]);
+
+  // Conta le vittorie individuali nella settimana più recente registrata
   const hotStreak = useMemo(() => {
-    // Combina tutte le partite con informazioni sul vincitore
     const allMatches = [
       ...SINGLE_MATCHES.map(m => ({
         date: m.date,
@@ -651,53 +754,21 @@ function Leaderboard() {
         }));
       }).flat()
     ];
+    if (allMatches.length === 0) return null;
 
-    // Ordina per data (più recente prima)
-    allMatches.sort((a, b) => {
-      const [dayA, monthA, yearA] = a.date.split('/').map(Number);
-      const [dayB, monthB, yearB] = b.date.split('/').map(Number);
-      const dateA = new Date(yearA, monthA - 1, dayA);
-      const dateB = new Date(yearB, monthB - 1, dayB);
-      return dateB.getTime() - dateA.getTime();
-    });
-
-    // Calcola streak per ogni giocatore
+    const parseDate = (date: string) => {
+      const [day, month, year] = date.split('/').map(Number);
+      return new Date(year, month - 1, day).getTime();
+    };
+    const latestDate = Math.max(...allMatches.map((match) => parseDate(match.date)));
+    const weekStart = latestDate - (7 * 24 * 60 * 60 * 1000);
     const streaks = new Map<string, number>();
-    
-    PLAYERS.forEach(player => {
-      let streak = 0;
-      // Conta vittorie consecutive dall'ultima partita
-      for (const match of allMatches) {
-        if (match.winner === player.name) {
-          streak++;
-        } else {
-          // Se il giocatore ha partecipato a questa partita ma ha perso, la streak si interrompe
-          const participated = SINGLE_MATCHES.some(m => 
-            (m.player1 === player.name || m.player2 === player.name) && m.date === match.date
-          ) || DOUBLE_MATCHES.some(m =>
-            (m.team1.includes(player.name) || m.team2.includes(player.name)) && m.date === match.date
-          );
-          
-          if (participated) break;
-        }
-      }
-      if (streak > 0) {
-        streaks.set(player.name, streak);
-      }
-    });
+    allMatches
+      .filter((match) => parseDate(match.date) >= weekStart && parseDate(match.date) <= latestDate)
+      .forEach((match) => streaks.set(match.winner, (streaks.get(match.winner) ?? 0) + 1));
 
-    // Trova il giocatore con la streak più alta
-    let maxStreak = 0;
-    let hotPlayer = '';
-    
-    streaks.forEach((streak, player) => {
-      if (streak > maxStreak) {
-        maxStreak = streak;
-        hotPlayer = player;
-      }
-    });
-
-    return maxStreak > 0 ? { player: hotPlayer, streak: maxStreak } : null;
+    const [hotPlayer, maxStreak] = [...streaks.entries()].sort(([, winsA], [, winsB]) => winsB - winsA)[0] ?? [];
+    return hotPlayer && maxStreak ? { player: hotPlayer, streak: maxStreak } : null;
   }, []);
 
   return (
@@ -792,6 +863,15 @@ function Leaderboard() {
                 delayBase={0.35} 
               />
             )}
+
+            <HeadToHeadCard
+              player1={headToHeadPlayer1}
+              player2={headToHeadPlayer2}
+              onPlayer1Change={setHeadToHeadPlayer1}
+              onPlayer2Change={setHeadToHeadPlayer2}
+              matches={headToHeadMatches}
+              delayBase={0.45}
+            />
           </div>
         </div>
         
