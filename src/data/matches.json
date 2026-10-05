@@ -2,7 +2,7 @@
   "players": [
     {
       "name": "Andrea",
-      "wins": 40
+      "wins": 42
     },
     {
       "name": "Carlotta",
@@ -14,15 +14,15 @@
     },
     {
       "name": "Gabri",
-      "wins": 3
+      "wins": 5
     },
     {
       "name": "Luca B",
-      "wins": 15
+      "wins": 16
     },
     {
       "name": "Luca V",
-      "wins": 34
+      "wins": 35
     },
     {
       "name": "Riccardo",
@@ -535,6 +535,45 @@
     }
   ],
   "doubleMatches": [
+    {
+      "team1": [
+        "Andrea",
+        "Gabri"
+      ],
+      "team2": [
+        "Luca B",
+        "Luca V"
+      ],
+      "score1": 19,
+      "score2": 21,
+      "date": "05/10/2026"
+    },
+    {
+      "team1": [
+        "Andrea",
+        "Gabri"
+      ],
+      "team2": [
+        "Luca B",
+        "Luca V"
+      ],
+      "score1": 21,
+      "score2": 18,
+      "date": "05/10/2026"
+    },
+    {
+      "team1": [
+        "Andrea",
+        "Gabri"
+      ],
+      "team2": [
+        "Luca B",
+        "Luca V"
+      ],
+      "score1": 21,
+      "score2": 16,
+      "date": "05/10/2026"
+    },
     {
       "team1": [
         "Andrea",
