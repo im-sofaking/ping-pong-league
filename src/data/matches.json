@@ -18,11 +18,11 @@
     },
     {
       "name": "Luca B",
-      "wins": 16
+      "wins": 18
     },
     {
       "name": "Luca V",
-      "wins": 35
+      "wins": 37
     },
     {
       "name": "Riccardo",
@@ -535,6 +535,32 @@
     }
   ],
   "doubleMatches": [
+    {
+      "team1": [
+        "Andrea",
+        "Gabri"
+      ],
+      "team2": [
+        "Luca B",
+        "Luca V"
+      ],
+      "score1": 19,
+      "score2": 21,
+      "date": "05/10/2026"
+    },
+    {
+      "team1": [
+        "Andrea",
+        "Gabri"
+      ],
+      "team2": [
+        "Luca B",
+        "Luca V"
+      ],
+      "score1": 19,
+      "score2": 21,
+      "date": "05/10/2026"
+    },
     {
       "team1": [
         "Andrea",
